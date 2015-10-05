@@ -71,6 +71,11 @@ public class MainWindow extends Stage {
 		calques.setX(getX() + getWidth());
 		calques.setY(getY());
 
+		getScene().getStylesheets().add("vue/style.css");
+		for (Module m : modules) {
+			m.getScene().getStylesheets().add("vue/style.css");
+		}
+
 		setOnCloseRequest((event) -> {
 			for (Module m : modules) {
 				m.close();

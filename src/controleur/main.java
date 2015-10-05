@@ -3,7 +3,7 @@
  * 
  * 
  */
-package timeflies_editeurmap;
+package controleur;
 
 import javafx.application.Application;
 import javafx.scene.Scene;
