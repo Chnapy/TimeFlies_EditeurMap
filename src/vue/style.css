@@ -2,3 +2,21 @@
 * {
 	-fx-background-radius: 0;
 }
+
+.bTuile {    
+	-fx-background-color: 
+        #000000,
+        linear-gradient(#7D7D7D, #303030),
+        linear-gradient(#424242, #262626),
+        linear-gradient(#393939, #222222);
+    -fx-background-insets: 0,1,2,3;
+    -fx-background-radius: 3,2,2,2;
+}
+
+.bTuile:selected {
+	-fx-effect: innershadow(three-pass-box, rgba(255, 255, 192, 0.8), 2, 1, 0, 0);
+}
+
+#mainWindow {
+	-fx-background: gray;
+}

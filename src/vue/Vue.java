@@ -5,10 +5,15 @@
  */
 package vue;
 
+import controleur.Controleur;
+import modele.Map;
 import vue.calques.CalquesWindow;
 import vue.liste_cartes.ListeWindow;
 import vue.main.MainWindow;
 import vue.outils.OutilsWindow;
+import vue.popup.Dialogues;
+import vue.popup.Dialogues.MapData;
+import vue.proprietes.ProprietesWindow;
 import vue.tuiles.TuilesWindow;
 
 /**
@@ -17,20 +22,22 @@ import vue.tuiles.TuilesWindow;
  */
 public class Vue {
 
-	private final MainWindow main;
+	public final MainWindow main;
 
-	private final OutilsWindow outils;
-	private final CalquesWindow calque;
-	private final ListeWindow liste;
-	private final TuilesWindow tuiles;
+	public final OutilsWindow outils;
+	public final CalquesWindow calque;
+	public final ListeWindow liste;
+	public final TuilesWindow tuiles;
+	public final ProprietesWindow proprietes;
 
-	public Vue() {
-		outils = new OutilsWindow();
-		calque = new CalquesWindow();
-		liste = new ListeWindow();
-		tuiles = new TuilesWindow();
+	public Vue(Controleur controleur) {
+		outils = new OutilsWindow(controleur);
+		calque = new CalquesWindow(controleur);
+		liste = new ListeWindow(controleur);
+		tuiles = new TuilesWindow(controleur);
+		proprietes = new ProprietesWindow(controleur);
 
-		main = new MainWindow(outils, calque, liste, tuiles);
+		main = new MainWindow(controleur, outils, calque, liste, tuiles, proprietes);
 	}
 
 	public void show() {
@@ -39,6 +46,20 @@ public class Vue {
 		calque.show();
 		liste.show();
 		tuiles.show();
+		proprietes.show();
+	}
+
+	public MapData nouveau() {
+		return Dialogues.nouvelleMap();
+	}
+
+	public void nouvelleMap(Map map) {
+		main.setMap(map);
+		outils.reset();
+		calque.reset();
+		liste.nouvelleMap(map);
+		tuiles.reset();
+		proprietes.setMap(map);
 	}
 
 }
