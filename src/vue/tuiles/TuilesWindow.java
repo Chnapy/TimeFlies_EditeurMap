@@ -8,13 +8,12 @@ package vue.tuiles;
 import controleur.Controleur;
 import gameplay.map.Type;
 import javafx.event.ActionEvent;
-import javafx.geometry.Point2D;
 import javafx.geometry.Pos;
 import javafx.scene.control.ToggleButton;
+import javafx.scene.control.Tooltip;
 import javafx.scene.layout.HBox;
 import vue.Module;
 import vue.main.Outil;
-import vue.main.Outil.Etat;
 
 /**
  * TuilesWindow.java
@@ -47,7 +46,7 @@ public class TuilesWindow extends Module {
 		bTuiles = new ToggleButton[4];
 
 		for (int i = 0; i < bTuiles.length; i++) {
-			final TuileView tuile = new TuileView(tabPoly, Type.values()[i], null) {
+			final TuileView tuile = new TuileView(tabPoly, Type.values()[i], null, false) {
 
 				@Override
 				protected void setEvents() {
@@ -65,11 +64,18 @@ public class TuilesWindow extends Module {
 				Outil.setType(tuile.getType());
 			});
 		}
+		bTuiles[0].setTooltip(new Tooltip("Tuile simple"));
+		bTuiles[1].setTooltip(new Tooltip("Tuile trou"));
+		bTuiles[2].setTooltip(new Tooltip("Tuile écran"));
+		bTuiles[3].setTooltip(new Tooltip("Tuile obstacle"));
 
 		hb.getChildren().addAll(bTuiles);
+		
+		getScene().getRoot().setDisable(true);
 	}
 
 	public void reset() {
+		getScene().getRoot().setDisable(false);
 	}
 
 	public ToggleButton[] getbTuiles() {

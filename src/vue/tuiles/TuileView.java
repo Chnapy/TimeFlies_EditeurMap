@@ -28,13 +28,14 @@ public class TuileView extends Polygon {
 	private Type type;
 	private final Point2D coordonnees;
 	private final Lien lien;
+	public final boolean toResize;
 
 	public TuileView copy() {
 		double[] bounds = new double[getPoints().size()];
 		for (int i = 0; i < getPoints().size(); i++) {
 			bounds[i] = getPoints().get(i);
 		}
-		TuileView copy = new TuileView(bounds, type, coordonnees);
+		TuileView copy = new TuileView(bounds, type, coordonnees, false);
 		copy.setLayoutX(getLayoutX());
 		copy.setLayoutY(getLayoutY());
 		return copy;
@@ -46,11 +47,20 @@ public class TuileView extends Polygon {
 			setChanged();
 		}
 	};
+	
+	public TuileView clone(double[] bounds) {
+		return new TuileView(bounds, type, coordonnees, false);
+	}
 
-	public TuileView(double[] bounds, Type type, Point2D coor) {
+	public TuileView(Type type, Point2D coor) {
+		this(null, type, coor, true);
+	}
+
+	public TuileView(double[] bounds, Type type, Point2D coor, boolean toResize) {
 		super(bounds);
 		coordonnees = coor;
 		lien = new Lien();
+		this.toResize = toResize;
 		setType(type);
 		setEvents();
 	}

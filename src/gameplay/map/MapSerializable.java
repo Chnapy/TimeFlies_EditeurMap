@@ -24,10 +24,11 @@ public class MapSerializable implements Serializable {
 	public final int difficulte;
 	public final Type[][] tuiles;
 	public final File background;
+	public final String version;
 	//TODO foreground
 
 	public MapSerializable(String nom, String description, String auteur, Type[][] tuiles, File background, 
-			int nbrEquipes, int joueursParEquipe, int difficulte) {
+			int nbrEquipes, int joueursParEquipe, int difficulte, String version) {
 		this.nom = nom;
 		this.description = description;
 		this.auteur = auteur;
@@ -36,6 +37,7 @@ public class MapSerializable implements Serializable {
 		this.nbrEquipes = nbrEquipes;
 		this.joueursParEquipe = joueursParEquipe;
 		this.difficulte = difficulte;
+		this.version = version;
 	}
 
 }

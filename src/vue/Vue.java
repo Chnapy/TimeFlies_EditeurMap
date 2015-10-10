@@ -41,8 +41,8 @@ public class Vue {
 	}
 
 	public void show() {
-		main.show();
 		outils.show();
+		main.show();
 		calque.show();
 		liste.show();
 		tuiles.show();
@@ -55,7 +55,7 @@ public class Vue {
 
 	public void nouvelleMap(Map map) {
 		main.setMap(map);
-		outils.reset();
+		outils.reset(map);
 		calque.reset();
 		liste.nouvelleMap(map);
 		tuiles.reset();

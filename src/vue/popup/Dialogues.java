@@ -5,12 +5,16 @@
  */
 package vue.popup;
 
+import java.io.File;
+import java.util.List;
 import java.util.Optional;
 import javafx.application.Platform;
 import javafx.geometry.HPos;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonBar.ButtonData;
 import javafx.scene.control.ButtonType;
@@ -25,7 +29,9 @@ import javafx.scene.control.TextField;
 import javafx.scene.control.TextInputControl;
 import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
+import javafx.stage.FileChooser;
 import modele.Connexion;
+import vue.proprietes.ConditionsInput;
 
 /**
  * nouvelleMap.java
@@ -33,11 +39,65 @@ import modele.Connexion;
  */
 public class Dialogues {
 
+	private final static Dialog dialogue = new Dialog();
+	private final static Alert alert = new Alert(AlertType.NONE);
+	private final static FileChooser fileChooser = new FileChooser();
+
+	static {
+		dialogue.getDialogPane().getStylesheets().add("vue/style.css");
+		alert.getDialogPane().getStylesheets().add("vue/style.css");
+		fileChooser.getExtensionFilters().addAll(
+				new FileChooser.ExtensionFilter("TimeFlies Map", "*.tfmap")
+		);
+	}
+
 	private static final int NOM_MAXWIDTH = 32;
 	private static final int DESCRIPTION_MAXWIDTH = 256;
 	private static final int TAILLE_MAX = 32;
 	private static final int NBR_EQUIPE_MAX = 8;
 	private static final int NBR_PERSOS_MAX = 64;
+
+	public static List<File> getFiles() {
+		fileChooser.setTitle("Charger un ou plusieurs fichiers");
+		return fileChooser.showOpenMultipleDialog(dialogue.getOwner());
+	}
+
+	public static File saveFile(String nom) {
+		fileChooser.setTitle(nom + " - Sauvegarder");
+		return fileChooser.showSaveDialog(dialogue.getOwner());
+	}
+
+	public static void alert(String head, String text, AlertType type) {
+		alert.getButtonTypes().clear();
+		alert.setAlertType(type);
+		alert.setTitle("Information");
+		alert.setHeaderText(head);
+		alert.getDialogPane().setContentText(text);
+		if (alert.getButtonTypes().isEmpty()) {
+			ButtonType bt1 = new ButtonType("Ok", ButtonData.OK_DONE);
+			alert.getButtonTypes().addAll(bt1);
+		}
+
+		alert.showAndWait();
+	}
+
+	public static ButtonData wantToClose(int size) {
+		alert.setAlertType(AlertType.CONFIRMATION);
+		alert.getButtonTypes().clear();
+		alert.setTitle("Fermeture de l'application");
+		alert.setHeaderText(size + " cartes n'ont pas été sauvegardées.");
+		alert.getDialogPane().setContentText("Les changements non sauvegardés seront perdus.\nVoulez-vous vraiment quitter ?");
+		ButtonType bt1 = new ButtonType("Sauvegarder", ButtonData.OK_DONE);
+		ButtonType bt2 = new ButtonType("Quitter", ButtonData.NO);
+		ButtonType bt3 = new ButtonType("Annuler", ButtonData.CANCEL_CLOSE);
+		alert.getButtonTypes().addAll(bt1, bt2, bt3);
+
+		alert.setResultConverter((p) -> p);
+		Optional result = alert.showAndWait();
+		System.out.println(alert.getWidth());
+
+		return result.isPresent() ? ((ButtonType) result.get()).getButtonData() : ButtonData.CANCEL_CLOSE;
+	}
 
 	public static class NumberField extends TextField {
 
@@ -67,8 +127,6 @@ public class Dialogues {
 			return ("".equals(text) || text.matches("[0-9]"));
 		}
 	}
-
-	private final static Dialog dialogue = new Dialog();
 
 	public static MapData nouvelleMap() {
 		dialogue.getDialogPane().getButtonTypes().clear();
@@ -102,20 +160,26 @@ public class Dialogues {
 
 		TextField nom = new TextField();
 		nom.setPromptText("Nom de la carte");
+		nom.textProperty().addListener(ConditionsInput.NOM.with(nom));
 
 		TextArea description = new TextArea();
 		description.setPromptText("Description de la carte");
 		description.setMaxHeight(100);
+		description.textProperty().addListener(ConditionsInput.DESCRIPTION.with(description));
 
 		NumberField width = new NumberField(), height = new NumberField();
 		width.setPromptText("0");
+		width.textProperty().addListener(ConditionsInput.LARGEUR.with(width));
 		height.setPromptText("0");
+		height.textProperty().addListener(ConditionsInput.LONGUEUR.with(height));
 
 		NumberField nbrEquipe = new NumberField();
 		nbrEquipe.setPromptText("2");
+		nbrEquipe.textProperty().addListener(ConditionsInput.NBR_EQUIPES.with(nbrEquipe));
 
 		NumberField persosParEquipe = new NumberField();
 		persosParEquipe.setPromptText("3");
+		persosParEquipe.textProperty().addListener(ConditionsInput.NBR_PERSOS.with(persosParEquipe));
 
 		Slider difficulte = new Slider(1, 5, 3);
 		difficulte.setShowTickLabels(true);
@@ -133,9 +197,11 @@ public class Dialogues {
 
 		TextField login = new TextField();
 		login.setPromptText("Pseudo");
+		login.textProperty().addListener(ConditionsInput.LOGIN.with(login));
 
 		PasswordField mdp = new PasswordField();
 		mdp.setPromptText("Mot de passe");
+		mdp.textProperty().addListener(ConditionsInput.MDP.with(mdp));
 
 		Button logButton = new Button("Se connecter");
 		logButton.setDisable(true);
@@ -157,27 +223,6 @@ public class Dialogues {
 				b.setText("Réessayer");
 			}
 
-		});
-
-		login.textProperty().addListener((observable, oldValue, newValue) -> {
-			if (newValue.isEmpty()) {
-				logButton.setDisable(true);
-			} else if (!mdp.getText().isEmpty()) {
-				logButton.setDisable(false);
-			}
-		});
-		mdp.textProperty().addListener((observable, oldValue, newValue) -> {
-			if (newValue.isEmpty()) {
-				logButton.setDisable(true);
-			} else if (!login.getText().isEmpty()) {
-				logButton.setDisable(false);
-			}
-		});
-		login.setOnAction((e) -> {
-			logButton.fire();
-		});
-		mdp.setOnAction((e) -> {
-			logButton.fire();
 		});
 
 		Label erreursLab = new Label();
@@ -222,58 +267,36 @@ public class Dialogues {
 						((Label) node).setAlignment(Pos.CENTER_RIGHT);
 					}
 				}
-			} else if (node instanceof TextInputControl && node != login && node != mdp) {
-				node.setUserData("0");
-				((TextInputControl) node).textProperty().addListener((observable, oldValue, newValue) -> {
-					erreursLab.setText("");
-					if (node == nom) {
-						if (!newValue.isEmpty() && newValue.length() <= NOM_MAXWIDTH) {
-							node.setUserData("");
-						} else {
-							node.setUserData("Le champ nom doit être rempli avec au max " + NOM_MAXWIDTH + " caractères.");
-						}
-					} else if (node == description) {
-						if (!newValue.isEmpty() && newValue.length() <= DESCRIPTION_MAXWIDTH) {
-							node.setUserData("");
-						} else {
-							node.setUserData("Le champ description doit être rempli avec au max " + DESCRIPTION_MAXWIDTH + " caractères.");
-						}
-					} else if (node == width || node == height) {
-						if (!newValue.isEmpty() && Integer.parseInt(newValue) <= TAILLE_MAX) {
-							node.setUserData("");
-						} else {
-							node.setUserData("Le champ " + ((node == width) ? "largeur" : "longueur") + " doit être inférieur ou égal à " + TAILLE_MAX + ".");
-						}
-					} else if (node == nbrEquipe) {
-						if (!newValue.isEmpty() && Integer.parseInt(newValue) <= NBR_EQUIPE_MAX && Integer.parseInt(newValue) != 1) {
-							node.setUserData("");
-						} else {
-							node.setUserData("Le champ nombre d'équipes doit être inférieur ou égal à " + NBR_EQUIPE_MAX + " et différent de 1.");
-						}
-					} else if (node == persosParEquipe) {
-						if (!newValue.isEmpty() && Integer.parseInt(newValue) <= NBR_PERSOS_MAX) {
-							node.setUserData("");
-						} else {
-							node.setUserData("Le champ personnages par équipe doit être inférieur ou égal à " + NBR_PERSOS_MAX + ".");
-						}
-					}
-					boolean disable = false;
-					for (Node n : grid.getChildren()) {
-						if (n instanceof TextInputControl && n != login && n != mdp
-								&& !((String) n.getUserData()).trim().isEmpty()) {
-							disable = true;
-							if (!"0".equals((String) n.getUserData())) {
-								if (erreursLab.getText().isEmpty()) {
-									erreursLab.setText(erreursLab.getText() + (String) n.getUserData());
-								} else {
-									erreursLab.setText(erreursLab.getText() + " (...)");
-									break;
+			} else if (node instanceof TextInputControl) {
+				TextInputControl input = (TextInputControl) node;
+				if (input != login && input != mdp) {
+					input.textProperty().addListener((observable, oldValue, newValue) -> {
+						erreursLab.setText("");
+						boolean disable = false;
+						for (Node n : grid.getChildren()) {
+							if (n instanceof TextInputControl && n != login && n != mdp
+									&& !((String) n.getUserData()).trim().isEmpty()) {
+								disable = true;
+								if (!"0".equals((String) n.getUserData())) {
+									if (erreursLab.getText().isEmpty()) {
+										erreursLab.setText(erreursLab.getText() + (String) n.getUserData());
+									} else {
+										erreursLab.setText(erreursLab.getText() + " (...)");
+										break;
+									}
 								}
 							}
 						}
-					}
-					createButton.setDisable(disable);
-				});
+						createButton.setDisable(disable);
+					});
+				} else {
+					input.textProperty().addListener((observable, oldValue, newValue) -> {
+						logButton.setDisable(!((String) login.getUserData()).isEmpty() || !((String) mdp.getUserData()).isEmpty());
+					});
+					((TextField) input).setOnAction((e) -> {
+						logButton.fire();
+					});
+				}
 			}
 		});
 
@@ -283,7 +306,8 @@ public class Dialogues {
 
 		dialogue.setResultConverter(dialogButton -> {
 			if (dialogButton == createButtonType) {
-				return new MapData(nom.getText(), description.getText(), Connexion.getLogin(), nbrEquipe.getInt(), persosParEquipe.getInt(), (int) difficulte.getValue(), width.getInt(), height.getInt());
+				return new MapData(nom.getText(), description.getText(), Connexion.getLogin(),
+						nbrEquipe.getInt(), persosParEquipe.getInt(), (int) difficulte.getValue(), width.getInt(), height.getInt());
 			}
 			return null;
 		});

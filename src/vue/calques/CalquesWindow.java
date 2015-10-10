@@ -49,6 +49,7 @@ public class CalquesWindow extends Module {
 		grille.setOnAction(event);
 
 		reset();
+		getScene().getRoot().setDisable(true);
 	}
 
 	public final void reset() {
@@ -60,6 +61,7 @@ public class CalquesWindow extends Module {
 		Platform.runLater(() -> {
 			controleur.calques(background.isSelected(), tuiles.isSelected(), foreground.isSelected(), grille.isSelected());
 		});
+		getScene().getRoot().setDisable(false);
 		
 	}
 

@@ -6,6 +6,7 @@
 package vue.main;
 
 import controleur.Controleur;
+import java.util.List;
 import javafx.beans.value.ObservableValue;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.Scene;
@@ -18,6 +19,7 @@ import vue.Module;
 import vue.calques.CalquesWindow;
 import vue.liste_cartes.ListeWindow;
 import vue.outils.OutilsWindow;
+import vue.popup.Dialogues;
 import vue.proprietes.ProprietesWindow;
 import vue.tuiles.TuilesWindow;
 
@@ -49,7 +51,7 @@ public class MainWindow extends Stage {
 	//Map
 	private Map map;
 
-	public MainWindow(Controleur controleur, OutilsWindow _outils, CalquesWindow _calques, 
+	public MainWindow(Controleur controleur, OutilsWindow _outils, CalquesWindow _calques,
 			ListeWindow _liste, TuilesWindow _tuiles, ProprietesWindow _proprietes) {
 		outils = _outils;
 		calques = _calques;
@@ -85,7 +87,20 @@ public class MainWindow extends Stage {
 			m.getScene().getStylesheets().add("vue/style.css");
 		}
 
-		setOnCloseRequest((event) -> {
+		setOnCloseRequest((e) -> {
+			List<Map> notSaved = liste.notSaved();
+			if (!notSaved.isEmpty()) {
+				switch (Dialogues.wantToClose(notSaved.size())) {
+					case CANCEL_CLOSE:
+						e.consume();
+						return;
+					case OK_DONE:
+						notSaved.forEach((m) -> controleur.sauvegarder(m));
+						break;
+					case NO:	//Sauvegarder & quitter
+						break;
+				}
+			}
 			for (Module m : modules) {
 				m.close();
 			}
@@ -162,5 +177,5 @@ public class MainWindow extends Stage {
 	public ImageView getBackground() {
 		return background;
 	}
-	
+
 }

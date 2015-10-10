@@ -29,10 +29,10 @@ public class MapTuiles extends Pane implements Observer {
 	}
 
 	public void setMap(Map map) {
-		int width = map.tuiles[0].length;
-		int height = map.tuiles.length;
 		getChildren().clear();
-		tabPoly = new TuileView[height][width];
+		tabPoly = map.view;
+		int width = tabPoly[0].length;
+		int height = tabPoly.length;
 
 		double polyWidth = getWidth() / ((double) (width + height) / 2);
 		double polyHeight = polyWidth / 2;
@@ -46,10 +46,12 @@ public class MapTuiles extends Pane implements Observer {
 
 		for (int y = 0; y < height; y++) {
 			for (int x = 0; x < width; x++) {
-				tabPoly[y][x] = new TuileView(polyBounds, map.tuiles[y][x], new Point2D(x, y));
+				if (tabPoly[y][x].toResize) {
+					tabPoly[y][x] = tabPoly[y][x].clone(polyBounds);
+					tabPoly[y][x].getLien().addObserver(this);
+				}
 				tabPoly[y][x].setLayoutX(x * polyWidth / 2 + y * polyWidth / 2);
 				tabPoly[y][x].setLayoutY(((height - 1) * polyHeight / 2) + x * polyHeight / 2 - y * polyHeight / 2);
-				tabPoly[y][x].getLien().addObserver(this);
 
 				getChildren().add(tabPoly[y][x]);
 			}
@@ -64,8 +66,6 @@ public class MapTuiles extends Pane implements Observer {
 		TuileView tuile = (TuileView) arg;
 		controleur.action(tuile);
 		switch (Outil.getEtat()) {
-			case TUILE:
-				break;
 			case REMPLISSAGE:
 				remplissage(tuile, tuile.getType(), Outil.getType(), new ArrayList<>());
 				break;
