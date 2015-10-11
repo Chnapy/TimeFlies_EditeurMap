@@ -6,7 +6,6 @@
 package vue.outils;
 
 import controleur.Controleur;
-import javafx.geometry.HPos;
 import javafx.geometry.Insets;
 import javafx.geometry.Orientation;
 import javafx.scene.control.Button;
@@ -24,24 +23,26 @@ import static vue.outils.OutilsWindow.Boutons.*;
  */
 public class OutilsWindow extends Module {
 
-	public enum Boutons {
+	public static enum Boutons {
 
-		NOUVEAU("new", "Créer une nouvelle carte"),
-		OUVRIR("open", "Ouvrir une carte"),
-		SAUVEGARDER("save", "Sauvegarder la carte actuelle"),
-		SAUVEGARDERTOUT("saveall", "Sauvegarder toutes les cartes"),
-		ANNULER("undo", "Annuler la dernière action"),
-		REFAIRE("redo", "Refaire l'action"),
-		TUILER("paint", "Placer des tuiles"),
-		REMPLIR("fill", "Remplir de tuiles");
+		NOUVEAU("new", "FileChooser.fileIcon", "Créer une nouvelle carte"),
+		OUVRIR("open", "FileChooser.newFolderIcon", "Ouvrir une carte"),
+		SAUVEGARDER("save", "FileChooser.newFolderIcon", "Sauvegarder la carte actuelle"),
+		SAUVEGARDERTOUT("saveall", "FileChooser.newFolderIcon", "Sauvegarder toutes les cartes"),
+		ANNULER("undo", "FileChooser.newFolderIcon", "Annuler la dernière action"),
+		REFAIRE("redo", "FileChooser.newFolderIcon", "Refaire l'action"),
+		TUILER("paint", "FileChooser.newFolderIcon", "Placer des tuiles"),
+		REMPLIR("fill", "FileChooser.newFolderIcon", "Remplir de tuiles");
 
-		public Button bouton;
+		public final Button bouton;
 
-		private Boutons(String pathImage, String tooltip) {
+		private Boutons(String pathImage, String systemImage, String tooltip) {
 			bouton = new Button();
 			bouton.setGraphic(new ImageView("icons/" + pathImage + ".png"));
 			bouton.setMinWidth(36);
 			bouton.setMaxWidth(36);
+			bouton.setMinHeight(36);
+			bouton.setMaxHeight(36);
 			bouton.setTooltip(new Tooltip(tooltip));
 		}
 	}
@@ -109,6 +110,11 @@ public class OutilsWindow extends Module {
 		if (b == ANNULER.bouton.isDisabled()) {
 			ANNULER.bouton.setDisable(!b);
 		}
+	}
+
+	@Override
+	protected void key(String key) {
+		controleur.key(key);
 	}
 
 }

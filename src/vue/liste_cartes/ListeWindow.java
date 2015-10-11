@@ -145,10 +145,15 @@ public class ListeWindow extends Module {
 
 	public List<Map> notSaved() {
 		List<Map> liste = new ArrayList();
-		listView.getItems().stream().filter((m) -> (m.modif || !new File(m.path).exists())).forEach((m) -> {
+		listView.getItems().stream().filter((m) -> (m.modif || m.path == null || !new File(m.path).exists())).forEach((m) -> {
 			liste.add(m.map);
 		});
 		return liste;
+	}
+
+	@Override
+	protected void key(String key) {
+		controleur.key(key);
 	}
 
 	public class MapString {

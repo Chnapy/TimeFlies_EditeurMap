@@ -165,4 +165,9 @@ public class ProprietesWindow extends Module {
 		map.difficulte = (int) sDifficulte.getValue();
 	}
 
+	@Override
+	protected void key(String key) {
+		controleur.key(key);
+	}
+
 }

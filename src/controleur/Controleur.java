@@ -7,12 +7,9 @@ package controleur;
 
 import gameplay.map.MapSerializable;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import java.util.prefs.BackingStoreException;
 import java.util.prefs.Preferences;
 import javafx.scene.control.Alert;
@@ -36,7 +33,7 @@ public class Controleur {
 	private Map map;
 	private int prefIndex;
 
-	public Controleur() {
+	public Controleur(String[] paths) {
 		prefs = Preferences.userNodeForPackage(Controleur.class);
 		vue = new Vue(this);
 		map = null;
@@ -51,6 +48,11 @@ public class Controleur {
 		} catch (BackingStoreException ex) {
 			ExceptionHandler.handle(ex);
 		}
+		List<File> files = new ArrayList();
+		for (String p : paths) {
+			files.add(new File(p));
+		}
+		ouvrir(files);
 	}
 
 	private void chargerPreferences() throws BackingStoreException {
@@ -79,17 +81,25 @@ public class Controleur {
 				ouvrir(files);
 				break;
 			case SAUVEGARDER:
-				sauvegarder(map);
+				if (map != null) {
+					sauvegarder(map);
+				}
 				break;
 			case SAUVEGARDERTOUT:
-				vue.liste.notSaved().forEach((m) -> sauvegarder(m));
-				vue.outils.saveAll();
+				if (map != null) {
+					vue.liste.notSaved().forEach((m) -> sauvegarder(m));
+					vue.outils.saveAll();
+				}
 				break;
 			case ANNULER:
-				annuler();
+				if (map != null) {
+					annuler();
+				}
 				break;
 			case REFAIRE:
-				refaire();
+				if (map != null) {
+					refaire();
+				}
 				break;
 			case TUILER:
 				tuiler();
@@ -109,7 +119,7 @@ public class Controleur {
 		setMap(new Map(mdata));
 	}
 
-	public void ouvrir(List<File> files) {
+	public final void ouvrir(List<File> files) {
 		if (files == null || files.isEmpty()) {
 			return;
 		}
@@ -117,9 +127,7 @@ public class Controleur {
 		try {
 			m = Map.fileToMap(files.get(0));
 			if (vue.liste.isset(m)) {
-				Dialogues.alert("Carte déjà chargée !",
-						"La carte que vous tentez de charger se trouvé déjà dans la liste des cartes.",
-						Alert.AlertType.WARNING);
+				Dialogues.mapChargee(m.nom);
 			} else {
 				setMap(m);
 				vue.liste.setPath(map, files.get(0).getPath());
@@ -127,19 +135,15 @@ public class Controleur {
 				map.prefKey = "map" + prefIndex;
 				prefs.put(map.prefKey, files.get(0).getPath());
 			}
-		} catch (IOException | ClassNotFoundException ex) {
-			Dialogues.alert("Chargement de fichier impossible !",
-					"Le fichier est peut-être endommagé.\nOu il a été conçu avec une ancienne version de l'éditeur.",
-					Alert.AlertType.ERROR);
+		} catch (Exception ex) {
+			Dialogues.openFail(files.get(0).getAbsolutePath(), ex);
 		}
 
 		for (int i = 1; i < files.size(); i++) {
 			try {
 				m = Map.fileToMap(files.get(i));
 				if (vue.liste.isset(m)) {
-					Dialogues.alert("Carte déjà chargée !",
-							"La carte que vous tentez de charger se trouvé déjà dans la liste des cartes.",
-							Alert.AlertType.WARNING);
+					Dialogues.mapChargee(m.nom);
 				} else {
 					vue.liste.addMap(m);
 					vue.liste.setPath(m, files.get(i).getPath());
@@ -147,10 +151,8 @@ public class Controleur {
 					m.prefKey = "map" + prefIndex;
 					prefs.put(m.prefKey, files.get(i).getPath());
 				}
-			} catch (IOException | ClassNotFoundException ex) {
-				Dialogues.alert("Chargement de fichier impossible !",
-						"Le fichier est peut-être endommagé.\nOu il a été conçu avec une ancienne version de l'éditeur.",
-						Alert.AlertType.ERROR);
+			} catch (Exception ex) {
+				Dialogues.openFail(files.get(i).getAbsolutePath(), ex);
 			}
 		}
 	}
@@ -264,8 +266,14 @@ public class Controleur {
 	}
 
 	public void setMap(Map map) {
+		long st = System.currentTimeMillis();
 		this.map = map;
 		vue.nouvelleMap(map);
+		System.out.println("Temps affichage de " + map.nom + " : " + (System.currentTimeMillis() - st) + "ms");
+	}
+
+	public void key(String key) {
+		vue.tuiles.keyAction(key);
 	}
 
 }

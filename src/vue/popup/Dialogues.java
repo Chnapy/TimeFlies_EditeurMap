@@ -31,6 +31,7 @@ import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
 import javafx.stage.FileChooser;
 import modele.Connexion;
+import vue.ExceptionHandler;
 import vue.proprietes.ConditionsInput;
 
 /**
@@ -81,6 +82,17 @@ public class Dialogues {
 		alert.showAndWait();
 	}
 
+	public static void mapChargee(String nom) {
+		alert(nom + "\nCarte déjà chargée !",
+				"La carte que vous tentez de charger se trouvé déjà dans la liste des cartes.",
+				Alert.AlertType.WARNING);
+	}
+
+	public static void openFail(String path, Throwable e) {
+		ExceptionHandler.handle(e, path, path + "\nChargement de fichier impossible !",
+				"Le fichier n'existe pas, est peut-être endommagé, ou a été conçu avec une ancienne version de l'éditeur.");
+	}
+
 	public static ButtonData wantToClose(int size) {
 		alert.setAlertType(AlertType.CONFIRMATION);
 		alert.getButtonTypes().clear();
@@ -94,7 +106,6 @@ public class Dialogues {
 
 		alert.setResultConverter((p) -> p);
 		Optional result = alert.showAndWait();
-		System.out.println(alert.getWidth());
 
 		return result.isPresent() ? ((ButtonType) result.get()).getButtonData() : ButtonData.CANCEL_CLOSE;
 	}

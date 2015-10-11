@@ -65,4 +65,9 @@ public class CalquesWindow extends Module {
 		
 	}
 
+	@Override
+	protected void key(String key) {
+		controleur.key(key);
+	}
+
 }

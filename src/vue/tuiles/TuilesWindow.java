@@ -57,20 +57,18 @@ public class TuilesWindow extends Module {
 			bTuiles[i].getStyleClass().add("bTuile");
 			bTuiles[i].setOnAction((ActionEvent e) -> {
 				for (ToggleButton b : bTuiles) {
-					if (b != e.getSource()) {
-						b.setSelected(false);
-					}
+					b.setSelected(b == e.getSource());
 				}
 				Outil.setType(tuile.getType());
 			});
 		}
-		bTuiles[0].setTooltip(new Tooltip("Tuile simple"));
-		bTuiles[1].setTooltip(new Tooltip("Tuile trou"));
-		bTuiles[2].setTooltip(new Tooltip("Tuile écran"));
-		bTuiles[3].setTooltip(new Tooltip("Tuile obstacle"));
+		bTuiles[0].setTooltip(new Tooltip("Tuile simple [Touche 1]"));
+		bTuiles[1].setTooltip(new Tooltip("Tuile trou [Touche 2]"));
+		bTuiles[2].setTooltip(new Tooltip("Tuile écran [Touche 3]"));
+		bTuiles[3].setTooltip(new Tooltip("Tuile obstacle [Touche 4]"));
 
 		hb.getChildren().addAll(bTuiles);
-		
+
 		getScene().getRoot().setDisable(true);
 	}
 
@@ -80,6 +78,28 @@ public class TuilesWindow extends Module {
 
 	public ToggleButton[] getbTuiles() {
 		return bTuiles;
+	}
+
+	@Override
+	protected void key(String key) {
+		keyAction(key);
+	}
+
+	public void keyAction(String key) {
+		switch (key) {
+			case "&":
+				bTuiles[0].fire();
+				break;
+			case "é":
+				bTuiles[1].fire();
+				break;
+			case "\"":
+				bTuiles[2].fire();
+				break;
+			case "{":
+				bTuiles[3].fire();
+				break;
+		}
 	}
 
 }

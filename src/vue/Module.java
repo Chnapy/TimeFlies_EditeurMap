@@ -8,6 +8,7 @@ package vue;
 import controleur.Controleur;
 import javafx.scene.Group;
 import javafx.scene.Scene;
+import javafx.scene.input.KeyCombination;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 
@@ -32,6 +33,25 @@ public abstract class Module extends Stage {
 		setTitle(title);
 		setAlwaysOnTop(true);
 		initStyle(StageStyle.UTILITY);
+		setOnCloseRequest((e) -> {
+			e.consume();
+			hide();
+		});
+		
+		getScene().getAccelerators().put(KeyCombination.valueOf("&"), () -> {
+			key("&");
+		});
+		getScene().getAccelerators().put(KeyCombination.valueOf("é"), () -> {
+			key("é");
+		});
+		getScene().getAccelerators().put(KeyCombination.valueOf("\""), () -> {
+			key("\"");
+		});
+		getScene().getAccelerators().put(KeyCombination.valueOf("{"), () -> {
+			key("{");
+		});
 	}
+	
+	protected abstract void key(String key);
 
 }

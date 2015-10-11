@@ -54,12 +54,12 @@ public class Vue {
 	}
 
 	public void nouvelleMap(Map map) {
+		proprietes.setMap(map);
 		main.setMap(map);
 		outils.reset(map);
 		calque.reset();
 		liste.nouvelleMap(map);
 		tuiles.reset();
-		proprietes.setMap(map);
 	}
 
 }
