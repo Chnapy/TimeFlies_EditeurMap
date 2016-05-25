@@ -5,10 +5,12 @@
  */
 package vue.popup;
 
+import Serializable.HorsCombat.HorsCombat.TypeCombat;
 import java.io.File;
 import java.util.List;
 import java.util.Optional;
 import javafx.application.Platform;
+import javafx.collections.FXCollections;
 import javafx.geometry.HPos;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -18,6 +20,7 @@ import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonBar.ButtonData;
 import javafx.scene.control.ButtonType;
+import javafx.scene.control.ComboBox;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
 import javafx.scene.control.Labeled;
@@ -51,12 +54,6 @@ public class Dialogues {
 				new FileChooser.ExtensionFilter("TimeFlies Map", "*.tfmap")
 		);
 	}
-
-	private static final int NOM_MAXWIDTH = 32;
-	private static final int DESCRIPTION_MAXWIDTH = 256;
-	private static final int TAILLE_MAX = 32;
-	private static final int NBR_EQUIPE_MAX = 8;
-	private static final int NBR_PERSOS_MAX = 64;
 
 	public static List<File> getFiles() {
 		fileChooser.setTitle("Charger un ou plusieurs fichiers");
@@ -145,7 +142,7 @@ public class Dialogues {
 			"Donnez un nom attrayant, qui résume votre carte en un ou deux mots.",
 			"Soyez bref et explicite. Indiquez les particularités de votre carte.",
 			"Attention à éviter les cartes trop petites ou trop grandes.",
-			"Combien d'équipe (au maximum) pourra contenir la carte ? Indiquez 0 pour un 'chacun pour soi'.\nChaque équipe pourra contenir (au maximum) combien de personnages ? Dans le cas d'un 'chacun pour soi' ce nombre représente le nombre total de personnages.",
+			"Combien d'équipe (au maximum) pourra contenir la carte ?\nChaque équipe pourra contenir (au maximum) combien de personnages ? Dans le cas d'un 'solo' ce nombre représente le nombre total de personnages.",
 			"Sur une échelle de 1 à 5, à combien estimez-vous la difficulté de la carte ?",
 			"La connexion n'est pas obligatoire. Elle vous permet d'inclure votre pseudo à la carte, et de partager votre carte sur le site officiel."
 		};
@@ -184,9 +181,17 @@ public class Dialogues {
 		height.setPromptText("0");
 		height.textProperty().addListener(ConditionsInput.LONGUEUR.with(height));
 
+		ComboBox typeCombat = new ComboBox(FXCollections.observableArrayList(TypeCombat.values()));
+		typeCombat.setValue(TypeCombat.values()[0]);
+
 		NumberField nbrEquipe = new NumberField();
-		nbrEquipe.setPromptText("2");
+		nbrEquipe.setPromptText("Nombre d'équipes");
 		nbrEquipe.textProperty().addListener(ConditionsInput.NBR_EQUIPES.with(nbrEquipe));
+		nbrEquipe.setDisable(true);
+
+		typeCombat.setOnAction((e) -> {
+			nbrEquipe.setDisable(typeCombat.getValue().equals(TypeCombat.SOLO));
+		});
 
 		NumberField persosParEquipe = new NumberField();
 		persosParEquipe.setPromptText("3");
@@ -244,7 +249,7 @@ public class Dialogues {
 		grid.addRow(1, new Label("Description:"));
 		grid.add(description, 1, 1, 4, 1);
 		grid.addRow(2, new Label("Taille de la carte:"), new Label("Largeur:"), width, new Label("Longueur:"), height);
-		grid.addRow(3, new Label("Équipes:"), new Label("Nombre d'équipes:"), nbrEquipe, new Label("Personnages par équipe:"), persosParEquipe);
+		grid.addRow(3, new Label("Type de combats:"), typeCombat, nbrEquipe, new Label("Personnages par équipe:"), persosParEquipe);
 		grid.addRow(4, new Label("Difficulté estimée:"));
 		grid.add(difficulte, 2, 4, 2, 1);
 		grid.add(separateur, 0, 5, 5, 1);
@@ -317,7 +322,7 @@ public class Dialogues {
 
 		dialogue.setResultConverter(dialogButton -> {
 			if (dialogButton == createButtonType) {
-				return new MapData(nom.getText(), description.getText(), Connexion.getLogin(),
+				return new MapData(nom.getText(), description.getText(), Connexion.getID(), (TypeCombat) typeCombat.getValue(),
 						nbrEquipe.getInt(), persosParEquipe.getInt(), (int) difficulte.getValue(), width.getInt(), height.getInt());
 			}
 			return null;
@@ -335,18 +340,20 @@ public class Dialogues {
 
 		public final String nom;
 		public final String description;
-		public final String auteur;
+		public final long idCreateur;
+		public final TypeCombat typeCombat;
 		public final int nbrEquipes;
 		public final int joueursParEquipe;
 		public final int difficulte;
 		public final int width;
 		public final int height;
 
-		public MapData(String nom, String description, String auteur, int nbrEquipes, int joueursParEquipe, int difficulte,
+		public MapData(String nom, String description, long idCreateur, TypeCombat typeCombat, int nbrEquipes, int joueursParEquipe, int difficulte,
 				int width, int height) {
 			this.nom = nom;
 			this.description = description;
-			this.auteur = auteur;
+			this.idCreateur = idCreateur;
+			this.typeCombat = typeCombat;
 			this.nbrEquipes = nbrEquipes;
 			this.joueursParEquipe = joueursParEquipe;
 			this.difficulte = difficulte;

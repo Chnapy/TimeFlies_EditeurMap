@@ -11,6 +11,7 @@ import vue.calques.CalquesWindow;
 import vue.liste_cartes.ListeWindow;
 import vue.main.MainWindow;
 import vue.outils.OutilsWindow;
+import vue.placement.PlacementWindow;
 import vue.popup.Dialogues;
 import vue.popup.Dialogues.MapData;
 import vue.proprietes.ProprietesWindow;
@@ -29,6 +30,7 @@ public class Vue {
 	public final ListeWindow liste;
 	public final TuilesWindow tuiles;
 	public final ProprietesWindow proprietes;
+	public final PlacementWindow placement;
 
 	public Vue(Controleur controleur) {
 		outils = new OutilsWindow(controleur);
@@ -36,8 +38,10 @@ public class Vue {
 		liste = new ListeWindow(controleur);
 		tuiles = new TuilesWindow(controleur);
 		proprietes = new ProprietesWindow(controleur);
+		placement = new PlacementWindow(controleur);
 
-		main = new MainWindow(controleur, outils, calque, liste, tuiles, proprietes);
+		main = new MainWindow(controleur, outils, calque, liste, tuiles, 
+				proprietes, placement);
 	}
 
 	public void show() {
@@ -60,6 +64,7 @@ public class Vue {
 		calque.reset();
 		liste.nouvelleMap(map);
 		tuiles.reset();
+		placement.setMap(map);
 	}
 
 }

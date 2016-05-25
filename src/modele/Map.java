@@ -5,8 +5,11 @@
  */
 package modele;
 
-import gameplay.map.MapSerializable;
-import gameplay.map.Type;
+import Serializable.HorsCombat.HorsCombat.TypeCombat;
+import Serializable.HorsCombat.Map.MapSerializable;
+import Serializable.HorsCombat.Map.PosPlacement;
+import Serializable.HorsCombat.Map.TypeTuile;
+import Serializable.Position;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -28,14 +31,17 @@ public class Map {
 
 	public String nom;
 	public String description;
-	public String auteur;	//Pseudo
-	public int nbrEquipes;	//0 = chacun pour soi
+	public long idCreateur;
+	public TypeCombat typeCombat;
+	public int nbrEquipes;
 	public int joueursParEquipe;	//3 = 3v3, 4 = 4v4 etc
 	public int difficulte;
-	public Type[][] tuiles;
+	public TypeTuile[][] tuiles;
+	public final ArrayList<PosPlacement> placement;
 	public File background;
-	public String version;
-	
+	public int versionMajeure;
+	public int versionMineure;
+
 	//Non serializé
 	public TuileView[][] view;
 	public ArrayList actions;
@@ -43,26 +49,29 @@ public class Map {
 	public String prefKey = null;
 
 	public Map(MapSerializable mser) {
-		this(mser.nom, mser.description, mser.auteur, mser.nbrEquipes, mser.joueursParEquipe, mser.difficulte, mser.tuiles, mser.version);
+		this(mser.nom, mser.description, mser.idCreateur, mser.typeCombat, mser.nbrEquipes, mser.joueursParEquipe, mser.difficulte, mser.tuiles, mser.placement, mser.versionMajeure, mser.versionMineure);
 	}
 
 	public Map(MapData mdata) {
-		this(mdata.nom, mdata.description, mdata.auteur, mdata.nbrEquipes, mdata.joueursParEquipe, mdata.difficulte, mdata.width, mdata.height, "0.0.1");
+		this(mdata.nom, mdata.description, mdata.idCreateur, mdata.typeCombat, mdata.nbrEquipes, mdata.joueursParEquipe, mdata.difficulte, mdata.width, mdata.height, 0, 1);
 	}
 
-	public Map(String nom, String description, String auteur, int nbrEquipes, int joueursParEquipe, int difficulte, int width, int height, String version) {
+	public Map(String nom, String description, long idCreateur, TypeCombat typeCombat, int nbrEquipes, int joueursParEquipe, int difficulte, int width, int height, int versionMajeure, int versionMineure) {
 		this.nom = nom;
 		this.description = description;
-		this.auteur = auteur;
+		this.idCreateur = idCreateur;
+		this.typeCombat = typeCombat;
 		this.nbrEquipes = nbrEquipes;
 		this.joueursParEquipe = joueursParEquipe;
 		this.difficulte = difficulte;
 		this.background = null;
-		this.version = version;
-		this.tuiles = new Type[height][width];
-		for (Type[] colonne : tuiles) {
+		this.versionMajeure = versionMajeure;
+		this.versionMineure = versionMineure;
+		this.tuiles = new TypeTuile[height][width];
+		this.placement = new ArrayList();
+		for (TypeTuile[] colonne : tuiles) {
 			for (int i = 0; i < colonne.length; i++) {
-				colonne[i] = Type.SIMPLE;
+				colonne[i] = TypeTuile.SIMPLE;
 			}
 		}
 		this.view = new TuileView[tuiles.length][tuiles[0].length];
@@ -75,22 +84,28 @@ public class Map {
 		actionIndex = -1;
 	}
 
-	public Map(String nom, String description, String auteur, int nbrEquipes, int joueursParEquipe, int difficulte, Type[][] tuiles, String version) {
+	public Map(String nom, String description, long idCreateur, TypeCombat typeCombat, int nbrEquipes, int joueursParEquipe, int difficulte, TypeTuile[][] tuiles, ArrayList<PosPlacement> placement, int versionMajeure, int versionMineure) {
 		this.nom = nom;
 		this.description = description;
-		this.auteur = auteur;
+		this.idCreateur = idCreateur;
+		this.typeCombat = typeCombat;
 		this.nbrEquipes = nbrEquipes;
 		this.joueursParEquipe = joueursParEquipe;
 		this.difficulte = difficulte;
 		this.background = null;
-		this.version = version;
+		this.versionMajeure = versionMajeure;
+		this.versionMineure = versionMineure;
 		this.tuiles = tuiles;
+		this.placement = placement;
 		this.view = new TuileView[tuiles.length][tuiles[0].length];
 		for (int y = 0; y < view.length; y++) {
 			for (int x = 0; x < view[0].length; x++) {
 				view[y][x] = new TuileView(tuiles[y][x], new Point2D(x, y));
 			}
 		}
+		placement.forEach((p) -> {
+			view[p.position.y][p.position.x].setNumEquipe(p.numEquipe);
+		});
 		actions = new ArrayList();
 		actionIndex = -1;
 	}
@@ -102,7 +117,7 @@ public class Map {
 	}
 
 	public MapSerializable getSerializable() {
-		return new MapSerializable(nom, description, auteur, tuiles, background, nbrEquipes, joueursParEquipe, difficulte, version);
+		return new MapSerializable(nom, description, idCreateur, typeCombat, nbrEquipes, joueursParEquipe, difficulte, tuiles, placement, background, versionMajeure, versionMineure);
 	}
 
 	public static Map fileToMap(File file) throws IOException, ClassNotFoundException {
@@ -115,16 +130,18 @@ public class Map {
 
 	@Override
 	public int hashCode() {
-		int hash = 7;
-		hash = 89 * hash + Objects.hashCode(this.nom);
-		hash = 89 * hash + Objects.hashCode(this.description);
-		hash = 89 * hash + Objects.hashCode(this.auteur);
-		hash = 89 * hash + this.nbrEquipes;
-		hash = 89 * hash + this.joueursParEquipe;
-		hash = 89 * hash + this.difficulte;
-		hash = 89 * hash + Arrays.deepHashCode(this.tuiles);
-		hash = 89 * hash + Objects.hashCode(this.background);
-		hash = 89 * hash + Objects.hashCode(this.version);
+		int hash = 5;
+		hash = 83 * hash + Objects.hashCode(this.nom);
+		hash = 83 * hash + Objects.hashCode(this.description);
+		hash = 83 * hash + (int) (this.idCreateur ^ (this.idCreateur >>> 32));
+		hash = 83 * hash + Objects.hashCode(this.typeCombat);
+		hash = 83 * hash + this.nbrEquipes;
+		hash = 83 * hash + this.joueursParEquipe;
+		hash = 83 * hash + this.difficulte;
+		hash = 83 * hash + Arrays.deepHashCode(this.tuiles);
+		hash = 83 * hash + Objects.hashCode(this.background);
+		hash = 83 * hash + this.versionMajeure;
+		hash = 83 * hash + this.versionMineure;
 		return hash;
 	}
 
@@ -143,7 +160,10 @@ public class Map {
 		if (!Objects.equals(this.description, other.description)) {
 			return false;
 		}
-		if (!Objects.equals(this.auteur, other.auteur)) {
+		if (!Objects.equals(this.idCreateur, other.idCreateur)) {
+			return false;
+		}
+		if (!Objects.equals(this.typeCombat, other.typeCombat)) {
 			return false;
 		}
 		if (this.nbrEquipes != other.nbrEquipes) {
@@ -155,20 +175,30 @@ public class Map {
 		if (this.difficulte != other.difficulte) {
 			return false;
 		}
+		if (!Objects.equals(this.placement, other.placement)) {
+			return false;
+		}
 		if (!Arrays.deepEquals(this.tuiles, other.tuiles)) {
 			return false;
 		}
 		if (!Objects.equals(this.background, other.background)) {
 			return false;
 		}
-		return Objects.equals(this.version, other.version);
+		if (!Objects.equals(this.versionMajeure, other.versionMajeure)) {
+			return false;
+		}
+		return Objects.equals(this.versionMineure, other.versionMineure);
 	}
 
 	public void tuileviewToTypes() {
-		tuiles = new Type[view.length][view[0].length];
+		tuiles = new TypeTuile[view.length][view[0].length];
 		for (int y = 0; y < view.length; y++) {
 			for (int x = 0; x < view[0].length; x++) {
 				tuiles[y][x] = view[y][x].getType();
+				if (view[y][x].getNumEquipe() != -1) {
+					placement.add(new PosPlacement(
+							new Position(x, y), view[y][x].getNumEquipe()));
+				}
 			}
 		}
 	}

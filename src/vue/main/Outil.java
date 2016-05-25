@@ -5,8 +5,8 @@
  */
 package vue.main;
 
-import gameplay.map.Type;
-import static gameplay.map.Type.SIMPLE;
+import Serializable.HorsCombat.Map.TypeTuile;
+import static Serializable.HorsCombat.Map.TypeTuile.SIMPLE;
 import static vue.main.Outil.Etat.TUILE;
 
 /**
@@ -16,12 +16,15 @@ import static vue.main.Outil.Etat.TUILE;
 public class Outil {
 	
 	private static Etat etat = TUILE;
-	private static Type type = SIMPLE;
+	private static TypeTuile type = SIMPLE;
+	private static int equipe;
+	private static int[] persosParEquipe;
+	private static int persosMaxParEquipe;
 
 	public static enum Etat {
 		TUILE,
-//		SELECTION,
-		REMPLISSAGE;
+		REMPLISSAGE,
+		PLACEMENT;
 	}
 
 	public static Etat getEtat() {
@@ -36,18 +39,42 @@ public class Outil {
 		Outil.etat = etat;
 	}
 
-	public static Type getType() {
+	public static TypeTuile getType() {
 		return type;
 	}
 
-	public static void setType(Type type) {
+	public static void setType(TypeTuile type) {
 		Outil.type = type;
 	}
 
-	public static void set(Etat etat, Type type) {
+	public static void set(Etat etat, TypeTuile type) {
 		System.out.println(etat + " " + type);
 		Outil.etat = etat;
 		Outil.type = type;
+	}
+
+	public static int getEquipe() {
+		return equipe;
+	}
+
+	public static void setEquipe(int equipe) {
+		Outil.equipe = equipe;
+	}
+
+	public static int[] getPersosParEquipe() {
+		return persosParEquipe;
+	}
+
+	public static void setPersosParEquipe(int[] persosParEquipe) {
+		Outil.persosParEquipe = persosParEquipe;
+	}
+
+	public static int getPersosMaxParEquipe() {
+		return persosMaxParEquipe;
+	}
+
+	public static void setPersosMaxParEquipe(int persosMaxParEquipe) {
+		Outil.persosMaxParEquipe = persosMaxParEquipe;
 	}
 
 }

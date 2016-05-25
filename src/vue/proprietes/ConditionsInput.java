@@ -79,7 +79,8 @@ public class ConditionsInput {
 
 	public static final MyListener NOM = new MyListener("nom", 1, 64);
 	public static final MyListener DESCRIPTION = new MyListener("description", 0, 256);
-	public static final MyListener VERSION = new MyListener("version", 1, 8);
+	public static final MyListener VERSIONMAJ = new MyListener("versionmaj", 1, 2);
+	public static final MyListener VERSIONMIN = new MyListener("versionmin", 1, 2);
 	public static final MyListener LARGEUR = new MyListener("largeur", 2, 64);
 	public static final MyListener LONGUEUR = new MyListener("longueur", 2, 64);
 	public static final MyListener NBR_EQUIPES = new MyListener("nbr. équipes", 0, 8, 1);

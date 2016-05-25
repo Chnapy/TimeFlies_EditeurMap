@@ -25,18 +25,19 @@ public class OutilsWindow extends Module {
 
 	public static enum Boutons {
 
-		NOUVEAU("new", "FileChooser.fileIcon", "Créer une nouvelle carte"),
-		OUVRIR("open", "FileChooser.newFolderIcon", "Ouvrir une carte"),
-		SAUVEGARDER("save", "FileChooser.newFolderIcon", "Sauvegarder la carte actuelle"),
-		SAUVEGARDERTOUT("saveall", "FileChooser.newFolderIcon", "Sauvegarder toutes les cartes"),
-		ANNULER("undo", "FileChooser.newFolderIcon", "Annuler la dernière action"),
-		REFAIRE("redo", "FileChooser.newFolderIcon", "Refaire l'action"),
-		TUILER("paint", "FileChooser.newFolderIcon", "Placer des tuiles"),
-		REMPLIR("fill", "FileChooser.newFolderIcon", "Remplir de tuiles");
+		NOUVEAU("new", "Créer une nouvelle carte"),
+		OUVRIR("open", "Ouvrir une carte"),
+		SAUVEGARDER("save", "Sauvegarder la carte actuelle"),
+		SAUVEGARDERTOUT("saveall", "Sauvegarder toutes les cartes"),
+		ANNULER("undo", "Annuler la dernière action"),
+		REFAIRE("redo", "Refaire l'action"),
+		TUILER("paint", "Placer des tuiles"),
+		REMPLIR("fill", "Remplir de tuiles"),
+		PLACER("place", "Indiquer les placements de début de combat");
 
 		public final Button bouton;
 
-		private Boutons(String pathImage, String systemImage, String tooltip) {
+		private Boutons(String pathImage, String tooltip) {
 			bouton = new Button();
 			bouton.setGraphic(new ImageView("icons/" + pathImage + ".png"));
 			bouton.setMinWidth(36);
@@ -63,23 +64,32 @@ public class OutilsWindow extends Module {
 		GridPane gp = new GridPane();
 		getScene().setRoot(gp);
 
-		Separator sepv = new Separator(Orientation.VERTICAL);
-		sepv.setPadding(new Insets(0, 0, 0, 3));
+		Insets insepv = new Insets(0, 0, 0, 3);
+		Separator sepv1 = new Separator(Orientation.VERTICAL), 
+				sepv2 = new Separator(Orientation.VERTICAL), 
+				sepv3 = new Separator(Orientation.VERTICAL);
+		sepv1.setPadding(insepv);
+		sepv2.setPadding(insepv);
+		sepv3.setPadding(insepv);
+		
+		
 
-		gp.addRow(0, NOUVEAU.bouton, OUVRIR.bouton, sepv, SAUVEGARDER.bouton, SAUVEGARDERTOUT.bouton);
-		gp.addRow(2, ANNULER.bouton, REFAIRE.bouton);
-		gp.addRow(4, TUILER.bouton, REMPLIR.bouton);
+		gp.addRow(0, NOUVEAU.bouton, OUVRIR.bouton, sepv1, SAUVEGARDER.bouton, SAUVEGARDERTOUT.bouton);
+		gp.addRow(2, ANNULER.bouton, REFAIRE.bouton, sepv2);
+		gp.addRow(4, TUILER.bouton, REMPLIR.bouton, sepv3, PLACER.bouton);
 		gp.setHgap(2);
 		gp.setVgap(2);
 		gp.setPadding(new Insets(2));
 
 		TUILER.bouton.setDisable(true);
 		REMPLIR.bouton.setDisable(true);
+		PLACER.bouton.setDisable(true);
 	}
 
 	public void reset(Map map) {
 		TUILER.bouton.setDisable(false);
 		REMPLIR.bouton.setDisable(false);
+		PLACER.bouton.setDisable(false);
 		canRefaire(map.actionIndex >= 0 && map.actionIndex < map.actions.size());
 		canAnnuler(map.actionIndex > 0);
 	}

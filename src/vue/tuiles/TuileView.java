@@ -5,7 +5,8 @@
  */
 package vue.tuiles;
 
-import gameplay.map.Type;
+import Serializable.HorsCombat.Map.TypeTuile;
+import static Serializable.HorsCombat.Map.TypeTuile.*;
 import java.util.Observable;
 import javafx.geometry.Point2D;
 import javafx.scene.paint.Color;
@@ -18,6 +19,18 @@ import vue.main.Outil;
  */
 public class TuileView extends Polygon {
 
+	public static final Color[] TUILE_CONTOUR_COLORS = {
+		Color.valueOf("16BAFB88"),
+		Color.valueOf("EE4C2088"),
+		Color.valueOf("F5E32188"),
+		Color.valueOf("6605CA88"),
+		Color.valueOf("62B70188"),
+		Color.valueOf("34120B88"),
+		Color.valueOf("058A8588"),
+		Color.valueOf("13B31788"),
+		Color.valueOf("D3559B88"),
+		Color.valueOf("6C294288"),};
+
 	public static final Color[] TUILE_COLORS = {
 		Color.valueOf("FFFFFF88"),
 		Color.valueOf("FF000088"),
@@ -25,7 +38,8 @@ public class TuileView extends Polygon {
 		Color.valueOf("00FF0088")
 	};
 
-	private Type type;
+	private TypeTuile type;
+	public int numEquipe;
 	private final Point2D coordonnees;
 	private final Lien lien;
 	public final boolean toResize;
@@ -35,7 +49,7 @@ public class TuileView extends Polygon {
 		for (int i = 0; i < getPoints().size(); i++) {
 			bounds[i] = getPoints().get(i);
 		}
-		TuileView copy = new TuileView(bounds, type, coordonnees, false);
+		TuileView copy = new TuileView(bounds, type, coordonnees, numEquipe, false);
 		copy.setLayoutX(getLayoutX());
 		copy.setLayoutY(getLayoutY());
 		return copy;
@@ -47,21 +61,28 @@ public class TuileView extends Polygon {
 			setChanged();
 		}
 	};
-	
+
 	public TuileView clone(double[] bounds) {
-		return new TuileView(bounds, type, coordonnees, false);
+		return new TuileView(bounds, type, coordonnees, numEquipe, false);
 	}
 
-	public TuileView(Type type, Point2D coor) {
+	public TuileView(TypeTuile type, Point2D coor) {
 		this(null, type, coor, true);
 	}
 
-	public TuileView(double[] bounds, Type type, Point2D coor, boolean toResize) {
+	public TuileView(double[] bounds, TypeTuile type, Point2D coor, boolean toResize) {
+		this(bounds, type, coor, -1, toResize);
+	}
+
+	public TuileView(double[] bounds, TypeTuile type, Point2D coor, int equipe, boolean toResize) {
 		super(bounds);
 		coordonnees = coor;
 		lien = new Lien();
+		this.numEquipe = equipe;
 		this.toResize = toResize;
+		setStrokeWidth(5);
 		setType(type);
+		setNumEquipe(numEquipe);
 		setEvents();
 	}
 
@@ -79,6 +100,12 @@ public class TuileView extends Polygon {
 			case ECRAN:
 				setFill(TUILE_COLORS[3]);
 				break;
+		}
+
+		if (this.numEquipe >= 0) {
+			setStroke(TUILE_CONTOUR_COLORS[numEquipe]);
+		} else {
+			setStroke(null);
 		}
 	}
 
@@ -115,6 +142,12 @@ public class TuileView extends Polygon {
 							break;
 					}
 					break;
+				case PLACEMENT:
+					if (numEquipe != Outil.getEquipe()) {
+						setStroke(TUILE_CONTOUR_COLORS[Outil.getEquipe()].darker());
+					} else if (numEquipe != -1) {
+						setStroke(TUILE_CONTOUR_COLORS[numEquipe].darker());
+					}
 			}
 		});
 		setOnMouseExited((e) -> {
@@ -122,6 +155,12 @@ public class TuileView extends Polygon {
 				case TUILE:
 					updateColor();
 					break;
+				case PLACEMENT:
+					if (numEquipe == -1) {
+						setStroke(null);
+					} else {
+						setStroke(TUILE_CONTOUR_COLORS[numEquipe]);
+					}
 			}
 		});
 		setOnMouseClicked((e) -> {
@@ -135,6 +174,31 @@ public class TuileView extends Polygon {
 				case REMPLISSAGE:
 					alert();
 					break;
+				case PLACEMENT:
+					if (getType().equals(TypeTuile.OBSTACLE)
+							|| getType().equals(TypeTuile.TROU)) {
+						break;
+					}
+					alert();
+					switch (e.getButton()) {
+						case PRIMARY:
+							if (numEquipe != Outil.getEquipe()) {
+								if (numEquipe != -1) {
+									Outil.getPersosParEquipe()[numEquipe]--;
+								}
+								setNumEquipe(Outil.getEquipe());
+								Outil.getPersosParEquipe()[numEquipe]++;
+							}
+							break;
+						case SECONDARY:
+							if (numEquipe != -1) {
+								Outil.getPersosParEquipe()[numEquipe]--;
+								setNumEquipe(-1);
+							}
+							break;
+					}
+					alert(-1);
+					break;
 			}
 		});
 	}
@@ -142,18 +206,27 @@ public class TuileView extends Polygon {
 	private void alert() {
 		alert(this);
 	}
-	
+
 	private void alert(Object arg) {
 		lien.change();
 		lien.notifyObservers(arg);
 	}
 
-	public Type getType() {
+	public TypeTuile getType() {
 		return type;
 	}
 
-	public final void setType(Type type) {
+	public final void setType(TypeTuile type) {
 		this.type = type;
+		updateColor();
+	}
+
+	public int getNumEquipe() {
+		return numEquipe;
+	}
+
+	public void setNumEquipe(int numEquipe) {
+		this.numEquipe = numEquipe;
 		updateColor();
 	}
 

@@ -12,13 +12,12 @@ package modele;
 public class Connexion {
 	
 	private static boolean connecte = false;
-	private static String login = null;
+	private static long idJoueur = -1;
 	
 	public static void connecter(String _login, String mdp) {
 		if(connecte)
 			return;
 		
-		login = _login;
 		//TODO Connexion
 		
 		connecte = true;
@@ -28,8 +27,8 @@ public class Connexion {
 		return connecte;
 	}
 
-	public static String getLogin() {
-		return login;
+	public static long getID() {
+		return idJoueur;
 	}
 
 }

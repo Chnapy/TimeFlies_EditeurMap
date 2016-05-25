@@ -6,18 +6,14 @@
 package vue.main;
 
 import controleur.Controleur;
-import controleur.main;
+import controleur.Main;
 import java.awt.Desktop;
-import java.awt.Event;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javafx.application.Application;
 import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.event.EventType;
@@ -44,6 +40,7 @@ import vue.Module;
 import vue.calques.CalquesWindow;
 import vue.liste_cartes.ListeWindow;
 import vue.outils.OutilsWindow;
+import vue.placement.PlacementWindow;
 import vue.popup.Dialogues;
 import vue.proprietes.ProprietesWindow;
 import vue.tuiles.TuilesWindow;
@@ -68,6 +65,7 @@ public class MainWindow extends Stage {
 	private final ListeWindow liste;
 	private final TuilesWindow tuiles;
 	private final ProprietesWindow proprietes;
+	private final PlacementWindow placement;
 
 	//Main
 	public final ImageView background;
@@ -76,19 +74,21 @@ public class MainWindow extends Stage {
 	public final Grille grille;
 
 	public MainWindow(Controleur _controleur, OutilsWindow _outils, CalquesWindow _calques,
-			ListeWindow _liste, TuilesWindow _tuiles, ProprietesWindow _proprietes) {
+			ListeWindow _liste, TuilesWindow _tuiles, ProprietesWindow _proprietes, PlacementWindow _placement) {
 		controleur = _controleur;
 		outils = _outils;
 		calques = _calques;
 		liste = _liste;
 		tuiles = _tuiles;
 		proprietes = _proprietes;
+		placement = _placement;
 		modules = new Module[]{
 			outils,
 			calques,
 			liste,
 			tuiles,
-			proprietes
+			proprietes,
+			placement
 		};
 
 		Menu menuFile = new Menu("Fichier", null,
@@ -139,9 +139,9 @@ public class MainWindow extends Stage {
 					}
 				}),
 				getMenuItem("A propos", null, (e) -> {
-					Dialogues.alert("TFmapper v" + main.VERSION.charAt(0),
-							main.LAST_MODIF + " - Version " + main.VERSION + "\n"
-							+ "Copyright © 2015 Richard Haddad\n"
+					Dialogues.alert("TFmapper v" + Main.VERSION.charAt(0),
+							Main.LAST_MODIF + " - Version " + Main.VERSION + "\n"
+							+ "Copyright © 2016 Richard Haddad\n"
 							+ "http://timeflies.fr",
 							Alert.AlertType.INFORMATION);
 				})
@@ -155,7 +155,7 @@ public class MainWindow extends Stage {
 		vRoot.setId("mainWindow");
 
 		setScene(scene);
-		setTitle("TFmap - Editeur de map");
+		setTitle("TFmapper - Editeur de map pour Timeflies");
 
 		setX(screenBounds.getWidth() * ((1 - SCREEN_COEFF) / 2));
 		setY(screenBounds.getHeight() * ((1 - SCREEN_COEFF) / 2));
@@ -179,7 +179,7 @@ public class MainWindow extends Stage {
 					case OK_DONE:
 						notSaved.forEach((m) -> controleur.sauvegarder(m));
 						break;
-					case NO:	//Sauvegarder & quitter
+					case NO:
 						break;
 				}
 			}
@@ -228,6 +228,9 @@ public class MainWindow extends Stage {
 		if (maximizedProperty().getValue()) {
 			outils.setX(0);
 			outils.setY(47);
+			
+			placement.setX(outils.getX() + outils.getWidth());
+			placement.setY(outils.getY());
 
 			liste.setX(0);
 			liste.setY(Screen.getPrimary().getVisualBounds().getHeight() - liste.getHeight());
@@ -243,6 +246,9 @@ public class MainWindow extends Stage {
 		} else {
 			outils.setX(getX() - liste.getWidth());
 			outils.setY(getY());
+			
+			placement.setX(outils.getX() + outils.getWidth());
+			placement.setY(outils.getY());
 
 			liste.setX(outils.getX());
 			liste.setY(outils.getY() + outils.getHeight() + 5);
@@ -261,7 +267,7 @@ public class MainWindow extends Stage {
 	public void setMap(Map map) {
 		mapTuiles.setMap(map);
 		grille.reset(map.tuiles[0].length, map.tuiles.length);
-		setTitle("TFmap - " + map.nom + " " + map.version);
+		setTitle("TFmapper - " + map.nom + " " + map.versionMajeure + "." + map.versionMineure);
 		requestFocus();
 	}
 

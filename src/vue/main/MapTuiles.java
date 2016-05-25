@@ -5,8 +5,8 @@
  */
 package vue.main;
 
+import Serializable.HorsCombat.Map.TypeTuile;
 import controleur.Controleur;
-import gameplay.map.Type;
 import java.util.ArrayList;
 import java.util.Observable;
 import java.util.Observer;
@@ -61,6 +61,9 @@ public class MapTuiles extends Pane implements Observer {
 	@Override
 	public void update(Observable o, Object arg) {
 		if (!(arg instanceof TuileView)) {
+			if (arg instanceof Integer && (int) arg == -1) {
+				controleur.updatePlacement();
+			}
 			return;
 		}
 		TuileView tuile = (TuileView) arg;
@@ -72,7 +75,7 @@ public class MapTuiles extends Pane implements Observer {
 		}
 	}
 
-	public void remplissage(TuileView tuile, Type oldType, Type newType, ArrayList<TuileView> listDejaVu) {
+	public void remplissage(TuileView tuile, TypeTuile oldType, TypeTuile newType, ArrayList<TuileView> listDejaVu) {
 		if (tuile == null || !tuile.getType().equals(oldType) || listDejaVu.contains(tuile)) {
 			return;
 		}

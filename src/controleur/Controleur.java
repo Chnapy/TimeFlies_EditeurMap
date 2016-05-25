@@ -5,10 +5,11 @@
  */
 package controleur;
 
-import gameplay.map.MapSerializable;
+import Serializable.HorsCombat.Map.MapSerializable;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.prefs.BackingStoreException;
 import java.util.prefs.Preferences;
@@ -107,6 +108,9 @@ public class Controleur {
 			case REMPLIR:
 				remplir();
 				break;
+			case PLACER:
+				placer();
+				break;
 		}
 	}
 
@@ -193,10 +197,17 @@ public class Controleur {
 
 	private void tuiler() {
 		Outil.setEtat(Outil.Etat.TUILE);
+		vue.placement.hide();
 	}
 
 	public void remplir() {
 		Outil.setEtat(Outil.Etat.REMPLISSAGE);
+		vue.placement.hide();
+	}
+
+	private void placer() {
+		Outil.setEtat(Outil.Etat.PLACEMENT);
+		vue.placement.show();
 	}
 
 	public void annuler() {
@@ -239,8 +250,8 @@ public class Controleur {
 	}
 
 	public void action(TuileView tuile) {
+		action();
 		vue.outils.modif(map);
-		vue.liste.modif(map);
 		if (map.actions.size() >= 16) {
 			map.actions.remove(0);
 		}
@@ -254,8 +265,15 @@ public class Controleur {
 			case REMPLISSAGE:
 				map.actions.add(vue.main.mapTuiles.getCopyTabPoly());
 				break;
+			case PLACEMENT:
+				map.actions.add(tuile.copy());
+				break;
 		}
 		map.actionIndex = map.actions.size() - 1;
+	}
+	
+	public void action() {
+		vue.liste.modif(map);
 	}
 
 	public void calques(boolean background, boolean tuiles, boolean foreground, boolean grille) {
@@ -265,15 +283,33 @@ public class Controleur {
 		vue.main.grille.setVisible(grille);
 	}
 
+	public void placement(int value) {
+		Outil.setEquipe(value);
+	}
+
 	public void setMap(Map map) {
 		long st = System.currentTimeMillis();
 		this.map = map;
+
+		int[] ppe = new int[map.nbrEquipes];
+		Arrays.fill(ppe, 0);
+		map.placement.stream().forEach((pp) -> {
+			ppe[pp.numEquipe]++;
+		});
+		Outil.setPersosParEquipe(ppe);
+		Outil.setEquipe(0);
+		Outil.setPersosMaxParEquipe(map.joueursParEquipe);
+
 		vue.nouvelleMap(map);
 		System.out.println("Temps affichage de " + map.nom + " : " + (System.currentTimeMillis() - st) + "ms");
 	}
 
 	public void key(String key) {
 		vue.tuiles.keyAction(key);
+	}
+
+	public void updatePlacement() {
+		this.vue.placement.updatePersos();
 	}
 
 }

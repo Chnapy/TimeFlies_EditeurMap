@@ -5,8 +5,8 @@
  */
 package vue.tuiles;
 
+import Serializable.HorsCombat.Map.TypeTuile;
 import controleur.Controleur;
-import gameplay.map.Type;
 import javafx.event.ActionEvent;
 import javafx.geometry.Pos;
 import javafx.scene.control.ToggleButton;
@@ -46,7 +46,7 @@ public class TuilesWindow extends Module {
 		bTuiles = new ToggleButton[4];
 
 		for (int i = 0; i < bTuiles.length; i++) {
-			final TuileView tuile = new TuileView(tabPoly, Type.values()[i], null, false) {
+			final TuileView tuile = new TuileView(tabPoly, TypeTuile.values()[i], null, false) {
 
 				@Override
 				protected void setEvents() {

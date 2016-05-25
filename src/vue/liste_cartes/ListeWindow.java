@@ -173,7 +173,7 @@ public class ListeWindow extends Module {
 
 		@Override
 		public String toString() {
-			return (select ? "> " : "") + (modif ? "*" : "") + map.nom + "  [" + map.version + "]";
+			return (select ? "> " : "") + (modif ? "*" : "") + map.nom + "  [" + map.versionMajeure + "." + map.versionMineure + "]";
 		}
 	}
 
